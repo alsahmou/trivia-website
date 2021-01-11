@@ -72,9 +72,9 @@ def create_app(test_config=None):
       question = Question.query.filter(Question.id == question_id).one_or_none()
       if question is None:
         abort(404)
-
-      question.delete()
-      return get_questions()
+      else:
+        question.delete()
+        return get_questions()
       
     except:
       abort(422)
@@ -97,39 +97,41 @@ def create_app(test_config=None):
 
     except:
       abort(422)
+      
+
+  @app.route('/questions/search', methods=['POST'])
+  def search_question():
+    body = request.get_json()
+    search_term = body.get('searchTerm', None)
+    questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+    current_questions = paginate_questions(request, questions)
+    if(len(current_questions) == 0):
+      abort(404)
+    categories = Category.query.order_by(Category.id).all()
+    return jsonify({
+      'success': True,
+      'questions': current_questions,
+      'total_questions': len(questions),
+      'categories': get_categories_dict(categories),
+    })
 
 
+  @app.route('/categories/<int:category_id>/questions', methods=['GET'])
+  def get_questions_by_category(category_id):
+    category = Category.query.get(category_id)
+    if category is None:
+      abort(404)
 
-  '''
-@TODO:
-Create an endpoint to POST a new question,
-which will require the question and answer text,
-category, and difficulty score.
+    questions = Question.query.order_by(Question.id).filter(Question.category == category_id).all()
+    current_questions = paginate_questions(request, questions)
 
-TEST: When you submit a question on the "Add" tab,
-the form will clear and the question will appear at the end of the last page
-of the questions list in the "List" tab.
-'''
+    return jsonify({
+      'success': True,
+      'questions': current_questions,
+      'total_questions': len(questions),
+      'current_category': category_id
+    })
 
-  '''
-@TODO:
-Create a POST endpoint to get questions based on a search term.
-It should return any questions for whom the search term
-is a substring of the question.
-
-TEST: Search by any phrase. The questions list will update to include
-only question that include that string within their question.
-Try using the word "title" to start.
-'''
-
-  '''
-@TODO:
-Create a GET endpoint to get questions based on category.
-
-TEST: In the "List" tab / main screen, clicking on one of the
-categories in the left column will cause only questions of that
-category to be shown.
-'''
 
   '''
 @TODO:
