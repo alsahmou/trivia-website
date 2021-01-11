@@ -86,8 +86,8 @@ def create_app(test_config=None):
       abort(422)
 
   
-  @app.route('/questions', methods=['POST'])
-  def create_question():
+  @app.route('/questions/submit', methods=['POST'])
+  def submit_question():
     body = request.get_json()
 
     new_question = body.get('question')
@@ -139,7 +139,7 @@ def create_app(test_config=None):
     })
 
   
-  @app.route('/quizzes', methods=['POST'])
+  @app.route('/quizzes/play', methods=['POST'])
   def play_quiz():
     body = request.get_json()
     try:
@@ -153,7 +153,6 @@ def create_app(test_config=None):
       if quiz_category == 0:
         questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
       else:
-        category = Category.query.get(quiz_category)
         questions = Question.query.filter(Question.id.notin_(previous_questions),Question.category == quiz_category).all()
       current_question = None
       if len(questions) > 0:
