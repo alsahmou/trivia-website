@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, abort, jsonify, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
@@ -10,8 +10,6 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 # Returns a dictionary of {id:type} for all categories
-
-
 def get_categories_dict(categories):
   categories_dict = {}
   for category in categories:
@@ -28,6 +26,14 @@ def paginate_questions(request, questions):
   current_questions = questions[start:end]
   return current_questions
 
+def get_question_dict(question):
+  if question is None:
+    return
+  question_dict = {}
+  question_dict['question'] = question.question
+  question_dict['answer'] = question.answer
+  question_dict['id'] = question.id
+  return question_dict
 
 def create_app(test_config=None):
   # create and configure the app
@@ -132,18 +138,65 @@ def create_app(test_config=None):
       'current_category': category_id
     })
 
+  
+  @app.route('/quizzes', methods=['POST'])
+  def play_quiz():
+    body = request.get_json()
+    try:
+      previous_questions = body.get('previous_questions')
+      print('previous questions', previous_questions)
+      quiz_category = body.get('quiz_category')['id']
 
-  '''
-@TODO:
-Create a POST endpoint to get questions to play the quiz.
-This endpoint should take category and previous question parameters
-and return a random questions within the given category,
-if provided, and that is not one of the previous questions.
+      if previous_questions is None or quiz_category is None:
+        abort(400)
+      
+      if quiz_category == 0:
+        questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
+      else:
+        category = Category.query.get(quiz_category)
+        questions = Question.query.filter(Question.id.notin_(previous_questions),Question.category == quiz_category).all()
+      current_question = None
+      if len(questions) > 0:
+        current_question = random.choice(questions)
+      
+      print('current question', current_question)
 
-TEST: In the "Play" tab, after a user selects "All" or a category,
-one question at a time is displayed, the user is allowed to answer
-and shown whether they were correct or not.
-'''
+      return jsonify({
+        'success': True,
+        'question': get_question_dict(current_question)
+      })
+
+    except:
+      abort(400)
+
+  # @app.route('/quizzes', methods=['POST'])
+  # def play_quiz():
+  #   body = request.get_json()
+  #   previous_questions = body['previous_questions']
+  #   print('previous questions', previous_questions)
+  #   category_id = body['quiz_category']['id']
+  #   if category_id is None:
+  #     abort(404)
+  #   elif category_id == 0:
+  #     questions = Question.query.order_by(Question.id).all()
+  #   else:
+  #     questions = Question.query.order_by(Question.id).filter(Question.category == category_id).all()
+  #   while len(questions) > 0:
+  #     print('Questions list', questions)
+  #     question = random.choice(questions)
+  #     question_dict = {}
+  #     question_dict['question'] = question.question
+  #     question_dict['answer'] = question.answer
+  #     question_dict['id'] = question.id
+  #     if question in previous_questions:
+  #       questions.remove(question)
+  #     else:
+  #       return jsonify({
+  #         'success': True,
+  #         'question': question_dict
+  #       })
+  
+
   @app.errorhandler(HTTPException)
   def handle_exception(e):
     return jsonify({
@@ -151,11 +204,5 @@ and shown whether they were correct or not.
       "error": e.code,
       "message": e.name
     }), e.code
-
-  '''
-@TODO:
-Create error handlers for all expected errors
-including 404 and 422.
-'''
 
   return app
