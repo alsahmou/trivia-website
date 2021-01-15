@@ -16,7 +16,6 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        # self.database_path = "postgresql://ali:hghghg@{}/{}".format('localhost:5432', self.database_name)
         self.database_path = config.test_database_path
         setup_db(self.app, self.database_path)
 
