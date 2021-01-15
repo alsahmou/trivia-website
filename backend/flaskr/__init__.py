@@ -170,32 +170,6 @@ def create_app(test_config=None):
     except:
       abort(400)
 
-  # @app.route('/quizzes', methods=['POST'])
-  # def play_quiz():
-  #   body = request.get_json()
-  #   previous_questions = body['previous_questions']
-  #   print('previous questions', previous_questions)
-  #   category_id = body['quiz_category']['id']
-  #   if category_id is None:
-  #     abort(404)
-  #   elif category_id == 0:
-  #     questions = Question.query.order_by(Question.id).all()
-  #   else:
-  #     questions = Question.query.order_by(Question.id).filter(Question.category == category_id).all()
-  #   while len(questions) > 0:
-  #     print('Questions list', questions)
-  #     question = random.choice(questions)
-  #     question_dict = {}
-  #     question_dict['question'] = question.question
-  #     question_dict['answer'] = question.answer
-  #     question_dict['id'] = question.id
-  #     if question in previous_questions:
-  #       questions.remove(question)
-  #     else:
-  #       return jsonify({
-  #         'success': True,
-  #         'question': question_dict
-  #       })
   
 
   @app.errorhandler(HTTPException)
@@ -206,19 +180,6 @@ def create_app(test_config=None):
       "message": e.name
     }), e.code
 
-  # @app.errorhandler(HTTPException)
-  # def handle_exception(e):
-  #   print(e)
-  #   """Return JSON instead of HTML for HTTP errors."""
-  #   # start with the correct headers and status code from the error
-  #   response = e.get_response()
-  #   # replace the body with JSON
-  #   response.data = json.dumps({
-  #       "code": e.code,
-  #       "name": e.name,
-  #       "description": e.description,
-  #   })
-  #   response.content_type = "application/json"
-  #   return response
+
 
   return app
