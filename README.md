@@ -39,6 +39,13 @@ createdb trivia
 psql trivia < trivia.psql
 ```
 
+In the backend folder, create a config.py file with the following variables and change username and password with your postgres username and password
+
+```bash
+database_path = 'postgresql://{username}:{password}@localhost:5432/trivia'
+test_database_path = 'postgresql://{username}:{password}@localhost:5432/trivia_test'
+```
+
 ### Running
 
 From within the `backend` directory first ensure you are working using your created virtual environment.
