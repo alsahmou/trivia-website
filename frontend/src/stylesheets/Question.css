@@ -65,6 +65,7 @@ span.page-num {
   font-weight: bolder;
   text-decoration: underline;
   font-size: 16px;
+  cursor: pointer;
 }
 
 span.page-num.active {
